@@ -1,0 +1,260 @@
+version: '3.8'
+
+services:
+  # Infrastructure Services
+  postgres:
+    image: postgres:15
+    container_name: tracking-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_MULTIPLE_DATABASES: shipment_db,location_db,event_db,notification_db,analytics_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/docker/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - tracking-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: tracking-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - tracking-network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: tracking-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - tracking-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: tracking-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    networks:
+      - tracking-network
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: tracking-kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    networks:
+      - tracking-network
+
+  # Microservices
+  shipment-service:
+    build: ./shipment-service
+    container_name: shipment-service
+    depends_on:
+      - postgres
+      - redis
+      - kafka
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/shipment_db
+      SPRING_DATASOURCE_USERNAME: shipment_user
+      SPRING_DATASOURCE_PASSWORD: shipment_pass
+      SPRING_REDIS_HOST: redis
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    networks:
+      - tracking-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/shipment-service/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  location-service:
+    build: ./location-service
+    container_name: location-service
+    depends_on:
+      - postgres
+      - redis
+      - kafka
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/location_db
+      SPRING_DATASOURCE_USERNAME: location_user
+      SPRING_DATASOURCE_PASSWORD: location_pass
+      SPRING_REDIS_HOST: redis
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    networks:
+      - tracking-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/location-service/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  event-service:
+    build: ./event-service
+    container_name: event-service
+    depends_on:
+      - postgres
+      - redis
+      - kafka
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/event_db
+      SPRING_DATASOURCE_USERNAME: event_user
+      SPRING_DATASOURCE_PASSWORD: event_pass
+      SPRING_REDIS_HOST: redis
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    networks:
+      - tracking-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/event-service/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    depends_on:
+      - postgres
+      - redis
+      - kafka
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/notification_db
+      SPRING_DATASOURCE_USERNAME: notification_user
+      SPRING_DATASOURCE_PASSWORD: notification_pass
+      SPRING_REDIS_HOST: redis
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    networks:
+      - tracking-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/notification-service/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  analytics-service:
+    build: ./analytics-service
+    container_name: analytics-service
+    depends_on:
+      - postgres
+      - redis
+      - kafka
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/analytics_db
+      SPRING_DATASOURCE_USERNAME: analytics_user
+      SPRING_DATASOURCE_PASSWORD: analytics_pass
+      SPRING_REDIS_HOST: redis
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    networks:
+      - tracking-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/analytics-service/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    depends_on:
+      - shipment-service
+      - location-service
+      - event-service
+      - notification-service
+      - analytics-service
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SHIPMENT_SERVICE_URL: http://shipment-service:8081
+      LOCATION_SERVICE_URL: http://location-service:8082
+      EVENT_SERVICE_URL: http://event-service:8083
+      NOTIFICATION_SERVICE_URL: http://notification-service:8084
+      ANALYTICS_SERVICE_URL: http://analytics-service:8085
+    networks:
+      - tracking-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: tracking-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - tracking-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: tracking-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infrastructure/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./infrastructure/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - tracking-network
+
+networks:
+  tracking-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:

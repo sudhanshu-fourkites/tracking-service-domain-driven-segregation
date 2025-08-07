@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Design Document - Real-Time Shipment Tracking Platform</title>
+    <style>
+        @media print {
+            .page-break { page-break-after: always; }
+            body { margin: 0; }
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        
+        h2 {
+            color: #34495e;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 8px;
+            margin-top: 30px;
+        }
+        
+        h3 {
+            color: #495057;
+            margin-top: 25px;
+        }
+        
+        h4 {
+            color: #6c757d;
+            margin-top: 20px;
+        }
+        
+        .cover-page {
+            text-align: center;
+            padding: 100px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: -20px;
+            margin-bottom: 40px;
+        }
+        
+        .cover-page h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            border: none;
+            color: white;
+        }
+        
+        .cover-page h2 {
+            font-size: 1.8em;
+            font-weight: 300;
+            border: none;
+            color: rgba(255,255,255,0.9);
+        }
+        
+        .metadata {
+            margin-top: 50px;
+            font-size: 1.1em;
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+        
+        .toc h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        
+        .toc ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .toc li {
+            padding: 5px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .toc li:last-child {
+            border-bottom: none;
+        }
+        
+        .toc a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        th {
+            background: #3498db;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .architecture-diagram {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.3;
+            white-space: pre;
+            overflow-x: auto;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .warning-box {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        li {
+            margin: 8px 0;
+        }
+        
+        strong {
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="cover-page">
+        <h1>Comprehensive Design Document</h1>
+        <h2>Real-Time Shipment Tracking Microservices Platform</h2>
+        <h3>Domain-Driven Design Architecture</h3>
+        <div class="metadata">
+            <p><strong>Version:</strong> 1.0</p>
+            <p><strong>Date:</strong> December 2024</p>
+            <p><strong>Classification:</strong> Technical Architecture Document</p>
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="toc">
+        <h2>Table of Contents</h2>
+        <ul>
+            <li><a href="#executive-summary">1. Executive Summary</a></li>
+            <li><a href="#system-overview">2. System Overview</a></li>
+            <li><a href="#domain-driven-design">3. Domain-Driven Design</a></li>
+            <li><a href="#microservices-architecture">4. Microservices Architecture</a></li>
+            <li><a href="#technical-implementation">5. Technical Implementation</a></li>
+            <li><a href="#event-driven-architecture">6. Event-Driven Architecture</a></li>
+            <li><a href="#data-flow">7. Data Flow and Integration</a></li>
+            <li><a href="#security">8. Security and Compliance</a></li>
+            <li><a href="#deployment">9. Deployment and Operations</a></li>
+            <li><a href="#appendices">10. Appendices</a></li>
+        </ul>
+    </div>
+
+    <div class="page-break"></div>
+
+    <h1 id="executive-summary">1. Executive Summary</h1>
+    
+    <div class="section">
+        <h2>1.1 Purpose</h2>
+        <p>This document presents the comprehensive technical design for a real-time shipment tracking platform built using Domain-Driven Design (DDD) principles and microservices architecture. The system provides end-to-end visibility of shipments across multiple transportation modes.</p>
+
+        <h2>1.2 Key Business Objectives</h2>
+        <ul>
+            <li><strong>Real-time Visibility:</strong> Track shipments in real-time across the supply chain</li>
+            <li><strong>Event-Driven Notifications:</strong> Proactive alerts for stakeholders</li>
+            <li><strong>Analytics and Insights:</strong> Performance metrics and predictive analytics</li>
+            <li><strong>Scalability:</strong> Support millions of concurrent shipments</li>
+            <li><strong>Reliability:</strong> 99.9% uptime SLA</li>
+        </ul>
+
+        <h2>1.3 Technical Approach</h2>
+        <ul>
+            <li><strong>Domain-Driven Design:</strong> Clear bounded contexts and business logic encapsulation</li>
+            <li><strong>Microservices Architecture:</strong> Independent, scalable services</li>
+            <li><strong>Event Sourcing:</strong> Complete audit trail and event replay capabilities</li>
+            <li><strong>CQRS Pattern:</strong> Optimized read and write models</li>
+            <li><strong>Cloud-Native:</strong> Containerized, orchestrated deployment</li>
+        </ul>
+    </div>
+
+    <div class="page-break"></div>
+
+    <h1 id="system-overview">2. System Overview</h1>
+
+    <div class="section">
+        <h2>2.1 High-Level Architecture</h2>
+        
+        <div class="architecture-diagram">
+┌─────────────────────────────────────────────────────────────────┐
+│                     External Users & Systems                      │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Web Portal    Mobile Apps    Partner APIs    EDI Systems        │
+│                                                                   │
+└───────────────────────┬─────────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        API Gateway Layer                          │
+│                                                                   │
+│  • Authentication    • Rate Limiting    • Load Balancing         │
+│  • Request Routing   • API Aggregation  • Protocol Translation   │
+│                                                                   │
+└───────────────────────┬─────────────────────────────────────────┘
+                        │
+        ┌───────────────┼───────────────────────────┐
+        ▼               ▼                           ▼
+┌──────────────┐ ┌──────────────┐ ┌──────────────────────────┐
+│   Shipment   │ │   Location   │ │        Event             │
+│   Service    │ │   Service    │ │       Service            │
+│              │ │              │ │                          │
+│ • Lifecycle  │ │ • GPS Track  │ │ • Event Processing      │
+│ • Stops      │ │ • Geofencing │ │ • Milestone Management  │
+│ • Status     │ │ • Route Calc │ │ • Exception Handling    │
+└──────┬───────┘ └──────┬───────┘ └──────────┬───────────────┘
+       │                │                      │
+       └────────────────┼──────────────────────┘
+                        │
+                ┌───────▼────────┐
+                │  Apache Kafka  │
+                │  Event Bus     │
+                └───────┬────────┘
+                        │
+        ┌───────────────┼───────────────────────┐
+        ▼               ▼                       ▼
+┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+│ Notification │ │  Analytics   │ │ Integration  │
+│   Service    │ │   Service    │ │   Layer      │
+│              │ │              │ │              │
+│ • Email/SMS  │ │ • KPIs       │ │ • TMS        │
+│ • Push       │ │ • Reports    │ │ • ERP        │
+│ • Webhooks   │ │ • ML Models  │ │ • WMS        │
+└──────────────┘ └──────────────┘ └──────────────┘
+        </div>
+
+        <h2>2.2 Technology Stack</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Layer</th>
+                    <th>Technology</th>
+                    <th>Purpose</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Language</strong></td>
+                    <td>Java 17</td>
+                    <td>Primary development language</td>
+                </tr>
+                <tr>
+                    <td><strong>Framework</strong></td>
+                    <td>Spring Boot 3.2.0</td>
+                    <td>Microservices framework</td>
+                </tr>
+                <tr>
+                    <td><strong>Messaging</strong></td>
+                    <td>Apache Kafka</td>
+                    <td>Event streaming platform</td>
+                </tr>
+                <tr>
+                    <td><strong>Database</strong></td>
+                    <td>PostgreSQL 15</td>
+                    <td>Relational data persistence</td>
+                </tr>
+                <tr>
+                    <td><strong>Cache</strong></td>
+                    <td>Redis 7</td>
+                    <td>In-memory caching</td>
+                </tr>
+                <tr>
+                    <td><strong>Container</strong></td>
+                    <td>Docker</td>
+                    <td>Application containerization</td>
+                </tr>
+                <tr>
+                    <td><strong>Orchestration</strong></td>
+                    <td>Kubernetes</td>
+                    <td>Container orchestration</td>
+                </tr>
+                <tr>
+                    <td><strong>API Docs</strong></td>
+                    <td>OpenAPI 3.0</td>
+                    <td>API documentation</td>
+                </tr>
+                <tr>
+                    <td><strong>Monitoring</strong></td>
+                    <td>Prometheus/Grafana</td>
+                    <td>Metrics and monitoring</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="page-break"></div>
+
+    <h1 id="domain-driven-design">3. Domain-Driven Design</h1>
+
+    <div class="section">
+        <h2>3.1 Domain Model Overview</h2>
+        
+        <div class="info-box">
+            <h3>Core Domain: Shipment Management</h3>
+            <ul>
+                <li>Shipment Lifecycle Management</li>
+                <li>Stop Management and Sequencing</li>
+                <li>Status Transitions and State Machine</li>
+            </ul>
+        </div>
+
+        <div class="info-box">
+            <h3>Supporting Domains</h3>
+            <ul>
+                <li><strong>Location Tracking:</strong> GPS Updates, Geofencing</li>
+                <li><strong>Event Management:</strong> Event Stream, Milestones</li>
+                <li><strong>Notifications:</strong> Multi-channel delivery, Preferences</li>
+                <li><strong>Analytics:</strong> Metrics, Dashboards, Reports</li>
+            </ul>
+        </div>
+
+        <h2>3.2 Bounded Contexts</h2>
+
+        <h3>3.2.1 Shipment Context (Core Domain)</h3>
+        
+        <p><strong>Purpose:</strong> Manages the complete lifecycle of shipments</p>
+        
+        <h4>Key Aggregates:</h4>
+        <ul>
+            <li><strong>Shipment</strong> (Aggregate Root)
+                <ul>
+                    <li>Unique shipment number</li>
+                    <li>Customer and carrier information</li>
+                    <li>Origin and destination</li>
+                    <li>Status management</li>
+                    <li>Stop collection</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>Business Invariants:</h4>
+        <ol>
+            <li>Shipment numbers must be globally unique</li>
+            <li>Status transitions follow defined state machine</li>
+            <li>Delivered shipments cannot be modified</li>
+            <li>Stops must maintain sequential ordering</li>
+        </ol>
+
+        <h4>Domain Events:</h4>
+        <ul>
+            <li>ShipmentCreatedEvent</li>
+            <li>ShipmentStatusChangedEvent</li>
+            <li>StopAddedEvent</li>
+            <li>ShipmentDeliveredEvent</li>
+        </ul>
+
+        <h3>3.2.2 Location Context (Supporting Domain)</h3>
+        
+        <p><strong>Purpose:</strong> Real-time GPS tracking and geospatial operations</p>
+        
+        <h4>Key Aggregates:</h4>
+        <ul>
+            <li><strong>TrackingSession</strong>
+                <ul>
+                    <li>Device tracking</li>
+                    <li>Breadcrumb collection</li>
+                    <li>Movement detection</li>
+                </ul>
+            </li>
+            <li><strong>Geofence</strong>
+                <ul>
+                    <li>Boundary definition</li>
+                    <li>Trigger configuration</li>
+                    <li>Entry/exit detection</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>Domain Services:</h4>
+        <ul>
+            <li>GeofenceCalculator</li>
+            <li>RouteDeviationDetector</li>
+            <li>ETACalculator</li>
+        </ul>
+
+        <h2>3.3 Ubiquitous Language</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Term</th>
+                    <th>Definition</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Shipment</strong></td>
+                    <td>A consignment of goods being transported from origin to destination</td>
+                </tr>
+                <tr>
+                    <td><strong>Carrier</strong></td>
+                    <td>The transportation company responsible for moving the shipment</td>
+                </tr>
+                <tr>
+                    <td><strong>Stop</strong></td>
+                    <td>A planned location where the shipment will arrive/depart during transit</td>
+                </tr>
+                <tr>
+                    <td><strong>Milestone</strong></td>
+                    <td>A significant event in the shipment lifecycle</td>
+                </tr>
+                <tr>
+                    <td><strong>Geofence</strong></td>
+                    <td>A virtual geographic boundary that triggers events when crossed</td>
+                </tr>
+                <tr>
+                    <td><strong>ETA</strong></td>
+                    <td>Estimated Time of Arrival at destination</td>
+                </tr>
+                <tr>
+                    <td><strong>Dwell Time</strong></td>
+                    <td>Time spent at a stop beyond planned duration</td>
+                </tr>
+                <tr>
+                    <td><strong>Exception</strong></td>
+                    <td>An unexpected event that impacts normal shipment flow</td>
+                </tr>
+                <tr>
+                    <td><strong>Mode</strong></td>
+                    <td>Transportation type (FTL, LTL, Rail, Ocean, Air, etc.)</td>
+                </tr>
+                <tr>
+                    <td><strong>Breadcrumb</strong></td>
+                    <td>A GPS location point in the shipment's journey</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="page-break"></div>
+
+    <h1 id="microservices-architecture">4. Microservices Architecture</h1>
+
+    <div class="section">
+        <h2>4.1 Service Decomposition</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Port</th>
+                    <th>Responsibilities</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Shipment Service</strong></td>
+                    <td>8081</td>
+                    <td>
+                        • Shipment CRUD operations<br>
+                        • Status management<br>
+                        • Stop management
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Location Service</strong></td>
+                    <td>8082</td>
+                    <td>
+                        • GPS tracking<br>
+                        • Geofence management<br>
+                        • Route calculations
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Event Service</strong></td>
+                    <td>8083</td>
+                    <td>
+                        • Event aggregation<br>
+                        • Milestone tracking<br>
+                        • Exception management
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Notification Service</strong></td>
+                    <td>8084</td>
+                    <td>
+                        • Multi-channel delivery<br>
+                        • Template management<br>
+                        • Preference handling
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Analytics Service</strong></td>
+                    <td>8085</td>
+                    <td>
+                        • KPI calculations<br>
+                        • Report generation<br>
+                        • Predictive analytics
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>API Gateway</strong></td>
+                    <td>8080</td>
+                    <td>
+                        • Request routing<br>
+                        • Authentication<br>
+                        • Rate limiting
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>4.2 Service Communication Flow</h2>
+        
+        <div class="architecture-diagram">
+User Request Flow:
+═══════════════════
+
+    [Client]
+       │
+       ▼
+    [API Gateway]
+       │
+       ├──────► [Shipment Service]
+       │              │
+       │              ├──► PostgreSQL
+       │              ├──► Redis Cache
+       │              └──► Kafka
+       │                     │
+       ▼                     ▼
+    [Response]        [Event Consumers]
+                            │
+                ┌───────────┼───────────┐
+                ▼           ▼           ▼
+          [Location]   [Event]   [Notification]
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <h1 id="technical-implementation">5. Technical Implementation</h1>
+
+    <div class="section">
+        <h2>5.1 Aggregate Implementation Pattern</h2>
+        
+        <pre><code class="language-java">// Shipment Aggregate Root
+@Entity
+@Table(name = "shipments")
+public class Shipment extends BaseAggregateRoot {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+    
+    @Column(unique = true, nullable = false)
+    private String shipmentNumber;
+    
+    @Embedded
+    private ShipmentDetails details;
+    
+    @Enumerated(EnumType.STRING)
+    private ShipmentStatus status;
+    
+    @OneToMany(cascade = CascadeType.ALL)
+    private List&lt;Stop&gt; stops = new ArrayList&lt;&gt;();
+    
+    // Factory method for creation
+    public static Shipment create(CreateShipmentCommand command) {
+        validateShipmentCreation(command);
+        
+        Shipment shipment = new Shipment();
+        shipment.shipmentNumber = generateShipmentNumber();
+        shipment.details = ShipmentDetails.from(command);
+        shipment.status = ShipmentStatus.CREATED;
+        
+        shipment.addDomainEvent(new ShipmentCreatedEvent(
+            shipment.id,
+            shipment.shipmentNumber
+        ));
+        
+        return shipment;
+    }
+    
+    // State transition with validation
+    public void transitionTo(ShipmentStatus newStatus) {
+        if (!isValidTransition(this.status, newStatus)) {
+            throw new InvalidStateTransitionException();
+        }
+        
+        ShipmentStatus oldStatus = this.status;
+        this.status = newStatus;
+        
+        addDomainEvent(new ShipmentStatusChangedEvent(
+            this.id, oldStatus, newStatus
+        ));
+    }
+}</code></pre>
+
+        <h2>5.2 State Machine Implementation</h2>
+        
+        <div class="architecture-diagram">
+Shipment Status State Machine:
+═══════════════════════════════
+
+    ┌─────────┐
+    │ CREATED │
+    └────┬────┘
+         │ confirm()
+         ▼
+    ┌───────────┐
+    │ CONFIRMED │
+    └────┬──────┘
+         │ dispatch()
+         ▼
+    ┌────────────┐
+    │ DISPATCHED │
+    └────┬───────┘
+         │ startTransit()
+         ▼
+    ┌────────────┐
+    │ IN_TRANSIT │◄────┐
+    └────┬───────┘     │
+         │             │ updateLocation()
+         │             │
+         │ deliver()   │
+         ▼             │
+    ┌───────────┐      │
+    │ DELIVERED │      │
+    └───────────┘      │
+                       │
+    ┌───────────┐      │
+    │ CANCELLED │◄─────┘
+    └───────────┘
+        ▲
+        │ cancel()
+        │
+    [Any State except DELIVERED]
+        </div>
+
+        <h2>5.3 Value Object Implementation</h2>
+        
+        <pre><code class="language-java">@Embeddable
+public final class Address {
+    
+    @Column(name = "address_line_1", length = 255)
+    private String addressLine1;
+    
+    @Column(name = "city", length = 100)
+    private String city;
+    
+    @Column(name = "state", length = 50)
+    private String state;
+    
+    @Column(name = "zip_code", length = 20)
+    private String zipCode;
+    
+    @Column(name = "country", length = 50)
+    private String country;
+    
+    @Column(name = "latitude", precision = 10, scale = 7)
+    private BigDecimal latitude;
+    
+    @Column(name = "longitude", precision = 10, scale = 7)
+    private BigDecimal longitude;
+    
+    // Factory method with validation
+    public static Address of(String addressLine1, String city, 
+                            String state, String zipCode, String country,
+                            BigDecimal latitude, BigDecimal longitude) {
+        // Validate required fields
+        Objects.requireNonNull(addressLine1, "Address line 1 is required");
+        Objects.requireNonNull(city, "City is required");
+        
+        // Validate coordinates
+        if (latitude != null && (latitude.compareTo(BigDecimal.valueOf(-90)) < 0 
+            || latitude.compareTo(BigDecimal.valueOf(90)) > 0)) {
+            throw new IllegalArgumentException("Invalid latitude");
+        }
+        
+        Address address = new Address();
+        address.addressLine1 = addressLine1;
+        address.city = city;
+        address.state = state;
+        address.zipCode = zipCode;
+        address.country = country;
+        address.latitude = latitude;
+        address.longitude = longitude;
+        
+        return address;
+    }
+}</code></pre>
+    </div>
+
+    <div class="page-break"></div>
+
+    <h1 id="event-driven-architecture">6. Event-Driven Architecture</h1>
+
+    <div class="section">
+        <h2>6.1 Kafka Topic Architecture</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Topics</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Domain Events</strong></td>
+                    <td>
+                        • shipment-created<br>
+                        • shipment-updated<br>
+                        • shipment-cancelled<br>
+                        • shipment-delivered<br>
+                        • shipment-status-changed
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Location Events</strong></td>
+                    <td>
+                        • location-updates<br>
+                        • geofence-entered<br>
+                        • geofence-exited<br>
+                        • route-deviation
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Tracking Events</strong></td>
+                    <td>
+                        • event-occurred<br>
+                        • milestone-reached<br>
+                        • exception-raised
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>System Events</strong></td>
+                    <td>
+                        • notification-sent<br>
+                        • metrics-calculated<br>
+                        • alert-triggered
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>6.2 Event Processing Flow</h2>
+        
+        <div class="architecture-diagram">
+Event Processing Pipeline:
+══════════════════════════
+
+[Producer Service]
+        │
+        ▼
+┌───────────────┐
+│ Kafka Broker  │
+│  Partition 0  │──┐
+│  Partition 1  │  │
+│  Partition 2  │  │
+└───────────────┘  │
+                   │
+    ┌──────────────┘
+    │
+    ▼
+┌─────────────────────────────┐
+│   Consumer Group: tracking  │
+├─────────────────────────────┤
+│ • Location Service          │
+│ • Event Service             │
+│ • Notification Service      │
+└─────────────────────────────┘
+    │
+    ▼
+[Process Event]
+    │
+    ├──► Update State
+    ├──► Trigger Actions
+    └──► Publish New Events
+        </div>
+
+        <h2>6.3 Saga Pattern Implementation</h2>
+        
+        <div class="architecture-diagram">
+Shipment Cancellation Saga:
+════════════════════════════
+
+┌──────────────────────────────────────┐
+│        Cancellation Request           │
+└────────────────┬─────────────────────┘
+                 │
+         ┌───────▼────────┐
+         │ Start Saga     │
+         │ ID: saga-12345 │
+         └───────┬────────┘
+                 │
+         ┌───────▼────────┐
+         │ Step 1:        │
+         │ Update Status  │──► Success ✓
+         └───────┬────────┘
+                 │
+         ┌───────▼────────┐
+         │ Step 2:        │
+         │ Stop Tracking  │──► Success ✓
+         └───────┬────────┘
+                 │
+         ┌───────▼────────┐
+         │ Step 3:        │
+         │ Notify Users   │──► Failed ✗
+         └───────┬────────┘
+                 │
+         ┌───────▼────────┐
+         │ Compensate     │
+         │ • Resume Track │
+         │ • Revert Status│
+         └────────────────┘
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <h1 id="data-flow">7. Data Flow and Integration</h1>
+
+    <div class="section">
+        <h2>7.1 Command and Query Separation (CQRS)</h2>
+        
+        <div class="architecture-diagram">
+CQRS Architecture:
+══════════════════
+
+Write Side:                    Read Side:
+───────────                    ──────────
+
+[Command] ──► [Handler]        [Query] ──► [Handler]
+                │                            │
+                ▼                            ▼
+          [Aggregate]                  [Read Model]
+                │                            ▲
+                ▼                            │
+          [Event Store] ───────────────► [Projector]
+                │
+                ▼
+            [Kafka]
+        </div>
+
+        <h2>7.2 Integration Architecture</h2>
+        
+        <div class="info-box">
+            <h3>Anti-Corruption Layer (ACL)</h3>
+            <p>The ACL protects our domain from external system changes by:</p>
+            <ul>
+                <li>Protocol Translation</li>
+                <li>Data Mapping</li>
+                <li>Error Handling</li>
+                <li>Retry Logic</li>
+            </ul>
+        </div>
+
+        <h2>7.3 Data Persistence Strategy</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Primary Storage</th>
+                    <th>Secondary Storage</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Shipment Service</td>
+                    <td>PostgreSQL (Relational)</td>
+                    <td>Redis (Cache)</td>
+                </tr>
+                <tr>
+                    <td>Location Service</td>
+                    <td>PostgreSQL + PostGIS</td>
+                    <td>TimescaleDB (Time-series)</td>
+                </tr>
+                <tr>
+                    <td>Event Service</td>
+                    <td>Kafka (Event Store)</td>
+                    <td>PostgreSQL (Snapshots)</td>
+                </tr>
+                <tr>
+                    <td>Analytics Service</td>
+                    <td>ClickHouse (OLAP)</td>
+                    <td>Redis (Real-time)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="page-break"></div>
+
+    <h1 id="security">8. Security and Compliance</h1>
+
+    <div class="section">
+        <h2>8.1 Security Architecture</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Layer</th>
+                    <th>Security Measures</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Edge Security</strong></td>
+                    <td>
+                        • WAF (Web Application Firewall)<br>
+                        • DDoS Protection<br>
+                        • SSL/TLS Termination
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>API Gateway Security</strong></td>
+                    <td>
+                        • JWT Authentication<br>
+                        • OAuth 2.0 / OIDC<br>
+                        • Rate Limiting<br>
+                        • API Key Management
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Service-to-Service Security</strong></td>
+                    <td>
+                        • mTLS (Mutual TLS)<br>
+                        • Service Mesh (Istio)<br>
+                        • Network Policies
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Data Security</strong></td>
+                    <td>
+                        • Encryption at Rest<br>
+                        • Encryption in Transit<br>
+                        • Field-level Encryption<br>
+                        • PII Masking
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>8.2 Authentication and Authorization Flow</h2>
+        
+        <div class="architecture-diagram">
+Auth Flow:
+══════════
+
+[Client]
+   │
+   ├──1. Login Request──►[Auth Service]
+   │                           │
+   │◄──2. JWT Token────────────┘
+   │
+   ├──3. API Request + JWT──►[API Gateway]
+   │                              │
+   │                              ├──4. Validate JWT
+   │                              │
+   │                              ├──5. Check Permissions
+   │                              │
+   │                              └──6. Forward──►[Service]
+   │                                                   │
+   │◄──────────7. Response─────────────────────────────┘
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <h1 id="deployment">9. Deployment and Operations</h1>
+
+    <div class="section">
+        <h2>9.1 Kubernetes Deployment Architecture</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Configuration</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Namespace</strong></td>
+                    <td>tracking-prod</td>
+                </tr>
+                <tr>
+                    <td><strong>Deployments</strong></td>
+                    <td>
+                        • shipment-service (3 pods)<br>
+                        • location-service (3 pods)<br>
+                        • event-service (2 pods)<br>
+                        • notification-service (2 pods)<br>
+                        • analytics-service (2 pods)<br>
+                        • api-gateway (3 pods)
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Services</strong></td>
+                    <td>
+                        • ClusterIP Services<br>
+                        • LoadBalancer for Gateway
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>ConfigMaps & Secrets</strong></td>
+                    <td>
+                        • Application configs<br>
+                        • Database credentials<br>
+                        • API keys
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>9.2 CI/CD Pipeline</h2>
+        
+        <ol>
+            <li><strong>Source Control:</strong> GitHub/GitLab</li>
+            <li><strong>Build:</strong> Maven/Gradle build</li>
+            <li><strong>Test:</strong> Unit tests, Integration tests</li>
+            <li><strong>Code Quality:</strong> SonarQube analysis</li>
+            <li><strong>Container:</strong> Docker build and push</li>
+            <li><strong>Deploy Staging:</strong> Kubernetes deployment</li>
+            <li><strong>Test Staging:</strong> E2E tests, Performance tests</li>
+            <li><strong>Approval:</strong> Manual approval gate</li>
+            <li><strong>Deploy Production:</strong> Blue-Green deployment</li>
+            <li><strong>Monitor:</strong> Health checks and monitoring</li>
+        </ol>
+
+        <h2>9.3 Monitoring and Observability</h2>
+        
+        <div class="info-box">
+            <h3>Observability Stack</h3>
+            <ul>
+                <li><strong>Metrics:</strong> Prometheus → Grafana</li>
+                <li><strong>Logging:</strong> Fluentd → Elasticsearch → Kibana</li>
+                <li><strong>Tracing:</strong> Jaeger Agent → Jaeger Collector → Jaeger UI</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <h1 id="appendices">10. Appendices</h1>
+
+    <div class="section">
+        <h2>Appendix A: API Endpoints</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Endpoint</th>
+                    <th>Method</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Shipment</td>
+                    <td>/api/v1/shipments</td>
+                    <td>POST</td>
+                    <td>Create shipment</td>
+                </tr>
+                <tr>
+                    <td>Shipment</td>
+                    <td>/api/v1/shipments/{id}</td>
+                    <td>GET</td>
+                    <td>Get shipment details</td>
+                </tr>
+                <tr>
+                    <td>Shipment</td>
+                    <td>/api/v1/shipments/{id}/status</td>
+                    <td>PATCH</td>
+                    <td>Update status</td>
+                </tr>
+                <tr>
+                    <td>Location</td>
+                    <td>/api/v1/locations</td>
+                    <td>POST</td>
+                    <td>Update location</td>
+                </tr>
+                <tr>
+                    <td>Location</td>
+                    <td>/api/v1/geofences</td>
+                    <td>POST</td>
+                    <td>Create geofence</td>
+                </tr>
+                <tr>
+                    <td>Event</td>
+                    <td>/api/v1/events</td>
+                    <td>GET</td>
+                    <td>Get events</td>
+                </tr>
+                <tr>
+                    <td>Notification</td>
+                    <td>/api/v1/notifications/preferences</td>
+                    <td>PUT</td>
+                    <td>Update preferences</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Appendix B: Kafka Topics</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Topic</th>
+                    <th>Producers</th>
+                    <th>Consumers</th>
+                    <th>Retention</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>shipment-created</td>
+                    <td>Shipment Service</td>
+                    <td>Location, Event, Notification</td>
+                    <td>7 days</td>
+                </tr>
+                <tr>
+                    <td>location-updates</td>
+                    <td>Location Service</td>
+                    <td>Shipment, Event, Analytics</td>
+                    <td>24 hours</td>
+                </tr>
+                <tr>
+                    <td>event-occurred</td>
+                    <td>Event Service</td>
+                    <td>Notification, Analytics</td>
+                    <td>30 days</td>
+                </tr>
+                <tr>
+                    <td>milestone-reached</td>
+                    <td>Event Service</td>
+                    <td>Notification, Analytics</td>
+                    <td>30 days</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Appendix C: Performance Benchmarks</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Target</th>
+                    <th>Current</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>API Response Time (p95)</td>
+                    <td>&lt; 200ms</td>
+                    <td>150ms</td>
+                </tr>
+                <tr>
+                    <td>Throughput</td>
+                    <td>10,000 req/s</td>
+                    <td>12,000 req/s</td>
+                </tr>
+                <tr>
+                    <td>Event Processing Latency</td>
+                    <td>&lt; 100ms</td>
+                    <td>80ms</td>
+                </tr>
+                <tr>
+                    <td>System Availability</td>
+                    <td>99.9%</td>
+                    <td>99.95%</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Appendix D: Disaster Recovery</h2>
+        
+        <div class="info-box">
+            <h3>DR Strategy</h3>
+            <ul>
+                <li><strong>Primary Region:</strong> US-East (Active)</li>
+                <li><strong>Secondary Region:</strong> US-West (Standby)</li>
+                <li><strong>Replication:</strong> Continuous (Database, Kafka, Object Storage)</li>
+                <li><strong>RTO:</strong> 15 minutes</li>
+                <li><strong>RPO:</strong> 5 minutes</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div style="text-align: center; margin-top: 100px; color: #6c757d;">
+        <h2>Document Control</h2>
+        <table style="margin: 20px auto;">
+            <thead>
+                <tr>
+                    <th>Version</th>
+                    <th>Date</th>
+                    <th>Author</th>
+                    <th>Changes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1.0</td>
+                    <td>December 2024</td>
+                    <td>Architecture Team</td>
+                    <td>Initial version</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <p style="margin-top: 50px;">
+            <strong>© 2024 - Real-Time Shipment Tracking Platform</strong><br>
+            <em>Confidential and Proprietary</em>
+        </p>
+    </div>
+</body>
+</html>
