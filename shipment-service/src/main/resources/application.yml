@@ -20,6 +20,10 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: public
+        jdbc:
+          lob:
+            non_contextual_creation: true
         format_sql: true
         jdbc:
           batch_size: 20
@@ -33,18 +37,23 @@ spring:
     enabled: true
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       acks: all
       retries: 3
+      compression-type: snappy
+      batch-size: 16384
+      linger-ms: 10
+      buffer-memory: 33554432
     consumer:
       group-id: shipment-service-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       auto-offset-reset: earliest
       enable-auto-commit: false
+      max-poll-records: 500
       properties:
         spring.json.trusted.packages: "*"
 
@@ -53,7 +62,7 @@ spring:
     port: ${REDIS_PORT:6379}
     password: ${REDIS_PASSWORD:}
     timeout: 2000ms
-    jedis:
+    lettuce:
       pool:
         max-active: 8
         max-idle: 8

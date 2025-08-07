@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-config
+  namespace: tracking-service
+data:
+  bootstrap-servers: "kafka-0.kafka-headless.tracking-service.svc.cluster.local:9092,kafka-1.kafka-headless.tracking-service.svc.cluster.local:9092,kafka-2.kafka-headless.tracking-service.svc.cluster.local:9092"
+  replication-factor: "3"
+  min-insync-replicas: "2"
+  compression-type: "snappy"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  namespace: tracking-service
+data:
+  host: "redis-master.tracking-service.svc.cluster.local"
+  port: "6379"
+  max-connections: "100"
+  timeout: "2000"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shipment-service-config
+  namespace: tracking-service
+data:
+  application.yaml: |
+    spring:
+      profiles:
+        active: kubernetes
+      jpa:
+        hibernate:
+          ddl-auto: validate
+        properties:
+          hibernate:
+            default_schema: public
+            jdbc:
+              batch_size: 20
+              lob:
+                non_contextual_creation: true
+      kafka:
+        producer:
+          compression-type: snappy
+          batch-size: 16384
+          linger-ms: 10
+          buffer-memory: 33554432
+        consumer:
+          max-poll-records: 500
+          fetch-min-size: 1024
+          fetch-max-wait: 500
+    management:
+      health:
+        livenessState:
+          enabled: true
+        readinessState:
+          enabled: true
+      endpoint:
+        health:
+          probes:
+            enabled: true
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: location-service-config
+  namespace: tracking-service
+data:
+  application.yaml: |
+    spring:
+      profiles:
+        active: kubernetes
+      data:
+        mongodb:
+          auto-index-creation: true
+      kafka:
+        producer:
+          compression-type: snappy
+          batch-size: 16384
+          linger-ms: 10
+          buffer-memory: 33554432
+    management:
+      health:
+        livenessState:
+          enabled: true
+        readinessState:
+          enabled: true
+      endpoint:
+        health:
+          probes:
+            enabled: true
+    location:
+      cleanup:
+        stale-threshold-hours: 72
+        archive-days: 30
+      history:
+        max-points-per-day: 1000
+        compression-threshold: 500
